@@ -4,7 +4,14 @@ Detects sensor drift, baseline deviation, and sudden step changes.
 """
 
 from typing import Dict, List, Any
-from ..health_index.calculator import SENSOR_THRESHOLDS
+
+try:
+    from app.health_index.calculator import SENSOR_THRESHOLDS
+except (ImportError, ModuleNotFoundError, ValueError):
+    try:
+        from ..health_index.calculator import SENSOR_THRESHOLDS
+    except (ImportError, ModuleNotFoundError, ValueError):
+        from health_index.calculator import SENSOR_THRESHOLDS
 
 SENSOR_NAMES = {
     'oilTemp': 'Top Oil Temperature',

@@ -152,6 +152,14 @@ export interface HealthAssessment {
     timeline: string;
     reason?: string;
   }>;
+  metadata?: {
+    faa?: number;
+    weights?: Record<string, number>;
+    model_type?: string;
+    disclaimer?: string;
+    engine?: string;
+    [key: string]: any;
+  };
 }
 
 export const SENSOR_DEFINITIONS: SensorDef[] = [

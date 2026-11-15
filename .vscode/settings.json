@@ -1,0 +1,12 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\Aarthy\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/services/ai-engine",
+    "${workspaceFolder}/services/ai-engine/app"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/services/ai-engine",
+    "${workspaceFolder}/services/ai-engine/app"
+  ],
+  "typescript.tsdk": "apps/web/node_modules/typescript/lib"
+}

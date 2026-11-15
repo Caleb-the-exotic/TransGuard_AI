@@ -1,0 +1,3 @@
+[tool.pyright]
+include = ["services/ai-engine"]
+extraPaths = ["services/ai-engine", "services/ai-engine/app"]

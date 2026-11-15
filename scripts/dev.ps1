@@ -1,4 +1,4 @@
-﻿# TransGuard AI – Local Development Runner (PowerShell)
+# TransGuard AI – Local Development Runner (PowerShell)
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host "  TransGuard AI – Industrial Telemetry & Predictive Platform v3.0" -ForegroundColor Cyan
 Write-Host "==============================================================================" -ForegroundColor Cyan

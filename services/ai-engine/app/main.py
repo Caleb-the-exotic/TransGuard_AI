@@ -14,11 +14,18 @@ from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List
 import datetime
 
-from .health_index.calculator import compute_health_index
-from .rul.estimator import compute_rul
-from .anomaly_detection.detector import detect_anomalies
-from .diagnostics.fault_classifier import classify_faults
-from .recommendations.engine import generate_recommendations
+try:
+    from app.health_index.calculator import compute_health_index
+    from app.rul.estimator import compute_rul
+    from app.anomaly_detection.detector import detect_anomalies
+    from app.diagnostics.fault_classifier import classify_faults
+    from app.recommendations.engine import generate_recommendations
+except (ImportError, ModuleNotFoundError, ValueError):
+    from .health_index.calculator import compute_health_index
+    from .rul.estimator import compute_rul
+    from .anomaly_detection.detector import detect_anomalies
+    from .diagnostics.fault_classifier import classify_faults
+    from .recommendations.engine import generate_recommendations
 
 app = FastAPI(
     title="TransGuard AI Diagnostic Engine",
