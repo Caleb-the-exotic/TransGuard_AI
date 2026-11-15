@@ -1,9 +1,31 @@
 {
-  "name": "transguard-ai",
-  "version": "2.5.0",
+  "name": "transguard-ai-monorepo",
+  "version": "3.0.0",
   "private": true,
-  "type": "module",
+  "description": "TransGuard AI – Industrial IoT Predictive Maintenance Platform for Distribution Transformers",
   "scripts": {
-    "start": "node server.js"
+    "web": "cd apps/web && npm run dev",
+    "web:build": "cd apps/web && npm run build",
+    "api": "cd services/api && npm run dev",
+    "api:build": "cd services/api && npm run build",
+    "api:start": "cd services/api && npm start",
+    "ai": "cd services/ai-engine && python -m uvicorn app.main:app --reload --port 8000",
+    "migrate": "node scripts/migrate.js"
+  },
+  "keywords": [
+    "iot",
+    "predictive-maintenance",
+    "transformer-health",
+    "esp32",
+    "timescaledb",
+    "fastify",
+    "react",
+    "echarts",
+    "fastapi"
+  ],
+  "author": "TransGuard AI Team",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

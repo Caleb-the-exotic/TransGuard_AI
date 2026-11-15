@@ -1,184 +1,179 @@
-# TransGuard AI — Predictive Maintenance Platform for Distribution Transformers
+# TransGuard AI – Smart Distribution Transformer Predictive Maintenance Platform
 
-**TransGuard AI** is an industrial-grade, AI/IoT-driven predictive maintenance and telemetry monitoring system designed specifically for electrical distribution transformers (11 kV / 415 V and benchtop hardware prototypes).
+[![Architecture: Monorepo](https://img.shields.io/badge/Architecture-Clean%20Monorepo-0284c7.svg)](#architecture)
+[![Frontend: React + Vite](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%20%7C%20ECharts-38bdf8.svg)](apps/web)
+[![Backend: Fastify + TypeScript](https://img.shields.io/badge/Backend-Fastify%20%7C%20WebSockets%20%7C%20pg-10b981.svg)](services/api)
+[![AI Engine: Python FastAPI](https://img.shields.io/badge/AI%20Engine-Python%20FastAPI%20%7C%20IEEE%20C57.91-f59e0b.svg)](services/ai-engine)
+[![Firmware: ESP32 + STM32](https://img.shields.io/badge/Firmware-ESP32%20%7C%20STM32%20Modbus-ef4444.svg)](firmware)
+
+An industrial-grade IoT and AI-driven predictive maintenance platform for distribution transformers (5 kVA – 1000 kVA). TransGuard AI combines physical sensor transducers (temperature, current, voltage, vibration, THD, and combustible gas), edge gateways (ESP32/STM32), high-throughput message brokers (Eclipse Mosquitto MQTT), an enterprise Fastify + TypeScript backend, a Python predictive analytics engine (IEEE C57.91), and an Apache ECharts-powered React dashboard.
 
 ---
 
-## 🚀 Quick Start Guide
+## Architecture Overview
 
-### 1. Prerequisites
-- **Node.js** (v16.x or newer, tested on Node.js v24)
-- Any modern web browser (**Google Chrome**, **Microsoft Edge**, or **Brave** recommended for full **Web Serial API** support)
+```
+Transformer Sensors (PT100, CT, ZMPT101B, MPU6050, DHT22)
+                          ↓
+        ESP32 / STM32 Edge Telemetry Gateway
+                          ↓
+      (MQTT :1883 / USB Web Serial / Wi-Fi HTTP)
+                          ↓
+      Mosquitto Broker ───→ Fastify Backend API (:3001)
+                                  │
+                  ┌───────────────┴───────────────┐
+                  ▼                               ▼
+       PostgreSQL / TimescaleDB        Python FastAPI AI Engine (:8000)
+       (In-Memory Fallback Active)     (IEEE C57.91 Thermal Aging)
+                  │                               │
+                  └───────────────┬───────────────┘
+                                  ▼
+                     React 18 + Vite Web App (:5173)
+```
 
-### 2. Start the Local Server
-Open a terminal in the project directory:
+---
+
+## Repository Structure
+
+```
+TransGuard_AI/
+│
+├── apps/
+│   └── web/                           # React 18 + TypeScript + Vite + Tailwind + ECharts
+│       ├── src/
+│       │   ├── components/            # UI components (charts, monitoring, layout)
+│       │   ├── pages/                 # 8 Core application modules
+│       │   ├── hooks/                 # TanStack Query data hooks
+│       │   ├── services/              # REST & WebSocket client
+│       │   └── types/                 # TypeScript domain interfaces
+│       ├── package.json
+│       └── vite.config.ts
+│
+├── services/
+│   ├── api/                           # Node.js + TypeScript + Fastify Backend
+│   │   ├── src/
+│   │   │   ├── routes/                # REST endpoints (fleet, telemetry, alerts, maintenance)
+│   │   │   ├── websocket/             # Bidirectional live telemetry streaming (/ws/telemetry)
+│   │   │   ├── mqtt/                  # MQTT.js subscriber and ingestion layer
+│   │   │   ├── repositories/          # PostgreSQL driver (pg) + In-memory resilience buffer
+│   │   │   └── services/simulator.ts  # Real-time multi-asset telemetry simulator
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── ai-engine/                     # Python 3.12 + FastAPI Diagnostic & RUL Engine
+│       ├── app/
+│       │   ├── health_index/          # IEEE C57.91 multi-variable weighted scoring
+│       │   ├── rul/                   # Arrhenius thermal insulation life model (F_AA)
+│       │   ├── anomaly_detection/     # Baseline deviation tracking
+│       │   ├── diagnostics/           # Rule-based fault classifier
+│       │   └── recommendations/       # Automated predictive maintenance generator
+│       ├── requirements.txt
+│       └── start.py
+│
+├── database/
+│   ├── schema.sql                     # Full PostgreSQL + TimescaleDB hypertable schema
+│   ├── migrations/                    # Version-controlled SQL migration scripts
+│   └── seeds/                         # Realistic industrial fleet & event seeds
+│
+├── firmware/
+│   ├── esp32/                         # ESP32 Arduino C++ firmware sketch & pinout guide
+│   └── stm32/                         # STM32 industrial RS-485 Modbus gateway specs
+│
+├── infrastructure/
+│   └── mosquitto/                     # Eclipse Mosquitto MQTT broker configuration
+│
+├── docs/                              # Architecture, API specs, and hardware wiring diagrams
+├── scripts/                           # Native startup scripts (dev.bat, dev.ps1, migrate.js)
+├── legacy/                            # Original prototype files safely preserved
+└── package.json                       # Monorepo root manifest
+```
+
+---
+
+## 8 Core Application Modules
+
+1. **Overview Dashboard** (`/`): Fleet-wide KPIs, healthy/warning/critical distribution donut chart, live alerts feed, and assets overview.
+2. **Live Transformer Monitoring** (`/monitoring`): Real-time numerical metrics for all 8 parameters, Apache ECharts interactive trend line with threshold markings, Field vs. Benchtop scale switcher, and live sensor connection status.
+3. **AI Health Assessment** (`/analytics`): Transformer Health Index (0–100), sub-scores breakdown (Winding 28%, Oil 24%, PQ 18%, Mechanical 16%, Load 14%), IEEE C57.91 Remaining Useful Life (RUL), fault signatures, and maintenance recommendations.
+4. **Alerts & Notifications** (`/alerts`): Critical, warning, and normal event log with 1-click Acknowledge and Resolve modals.
+5. **Predictive Maintenance** (`/maintenance`): Automated work-order generation, technician assignment, priority scheduling, and status lifecycle transitions.
+6. **Transformer Assets** (`/assets`): Asset directory, nameplate ratings, commissioning history, and digital twin specifications.
+7. **Reports & Analytics** (`/reports`): Audit snapshot preview and downloadable UTF-8 CSV reports for fleet status and historical alerts.
+8. **Device Management** (`/devices`): ESP32 and STM32 microcontroller registry, Wi-Fi/LTE/USB telemetry connectivity status, and copyable firmware code snippets.
+
+---
+
+## Quickstart Guide
+
+### Prerequisites
+- **Node.js** >= v20.0.0
+- **Python** >= 3.10
+- **PostgreSQL** (Optional; the API features an automatic in-memory fallback store if PostgreSQL is not running)
+- **Eclipse Mosquitto** (Optional; telemetry simulator operates automatically)
+
+### 1. Installation
+
+Install all dependencies in the web and API workspaces:
 ```bash
-node server.js
-```
-The server will initialize immediately on port **3000**:
-```text
-TransGuard AI Industrial Telemetry Server listening on port 3000
-  - Dashboard:  http://localhost:3000
-  - Fleet API:  http://localhost:3000/api/fleet
-  - Telemetry:  http://localhost:3000/telemetry
-```
+# In services/api
+cd services/api
+npm install
 
-### 3. Open the Dashboard
-Navigate to:
-👉 **[http://localhost:3000](http://localhost:3000)**
+# In apps/web
+cd ../../apps/web
+npm install
 
-*(Alternatively, you can open [transguard_app.html](file:///c:/Users/Aarthy/Desktop/TransGuard%20AI%20app/transguard_app.html) or [index.html](file:///c:/Users/Aarthy/Desktop/TransGuard%20AI%20app/index.html) directly in your browser.)*
-
----
-
-## 🏛️ System Architecture
-
-```text
-  [ Physical Transformer Sensors ]
-   ├── Top Oil Temp (PT100 / DS18B20)
-   ├── Current Transformer CT (SCT-013 / ACS712)
-   ├── Line Voltage PT (ZMPT101B)
-   ├── Tank Core Vibration (MPU6050 Accelerometer)
-   ├── Dissolved Combustible Gas (MQ-2)
-   └── Ambient Conditions (DHT22)
-                 │
-                 ▼
-  [ ESP32 / STM32 Edge Gateway ]
-   ├── USB Web Serial (115200 Baud)
-   └── Wi-Fi 802.11 / HTTP REST & WebSocket
-                 │
-                 ▼
-  [ Node.js Backend Server (server.js) ]
-   ├── REST API Endpoints (/api/fleet, /api/telemetry, /api/alerts, /api/maintenance)
-   └── Real-Time Telemetry Ingestion Engine
-                 │
-                 ▼
-  [ AI Analytics & Diagnostic Engine ]
-   ├── Transformer Health Index (THI: 0–100)
-   ├── IEEE C57.91 Insulation Thermal Aging (F_AA) & RUL Estimation
-   ├── Statistical Anomaly Detection (Z-score deviation)
-   └── Failure Mode Classification Matrix
-                 │
-                 ▼
-  [ TransGuard AI Enterprise Dashboard ]
+# In services/ai-engine
+cd ../../services/ai-engine
+pip install -r requirements.txt
 ```
 
----
+### 2. Launching Services Locally
 
-## 📦 The 8 Core Operational Modules
+#### Option A: One-Click Windows Script
+```powershell
+# In PowerShell from project root:
+.\scripts\dev.ps1
 
-1. **Fleet Overview Dashboard (`/overview`)**
-   - Fleet KPIs: Total Transformers, Average Health Index, Healthy/Warning/Critical breakdown, Active Alarms, and Connected Edge Gateways.
-   - Comprehensive fleet summary table with live health progress bars, RUL projections, and quick jump buttons.
+# Or in Command Prompt:
+scripts\dev.bat
+```
 
-2. **Live Transformer Telemetry (`/monitoring`)**
-   - Active transformer selector with full nameplate specs and operational mode.
-   - 8 modular live telemetry cards with real-time numerical readings, sensor IC details, operational thresholds (Base, Warn, Crit), and dynamic sparklines.
-   - High-precision rolling interactive SVG area chart with touch drag and mouse hover scrubber inspection.
-   - Selectable time windows: **LIVE**, **1M**, **5M**, **15M**.
-   - Dual hardware calibration scales: **Benchtop Prototype (24V)** vs **Grid Distribution (11kV)**.
+#### Option B: Individual Terminals
+```bash
+# Terminal 1: Fastify Backend API (Port 3001)
+cd services/api
+npm run dev
 
-3. **AI Health Assessment & Diagnostics (`/analytics`)**
-   - **Transformer Health Index (THI)** weighted across 5 critical subsystems: Solid Insulation (28%), Liquid Dielectric (24%), Power Quality (18%), Mechanical Clamping (16%), and Load Margin (14%).
-   - **IEEE C57.91 Insulation Aging Acceleration Factor ($F_{AA}$)** and **Remaining Useful Life (RUL in years and %)**.
-   - **Statistical Anomaly Engine**: Automatic flagging of sensor deviations above 40% from baseline.
-   - **Fault Classification Matrix**: Detects Thermal Runaway, Harmonic Resonance, Core Looseness, and Partial Discharge.
-   - **AI Maintenance Prescriptions**: Actionable maintenance recommendations linked directly to work order generation.
+# Terminal 2: Python AI Engine (Port 8000)
+cd services/ai-engine
+python start.py
 
-4. **Alerts & Incidents Management (`/alerts`)**
-   - Filterable alert audit log by severity (All, Critical, Warning, Normal) and status (Active, Acknowledged, Resolved).
-   - Instant operator acknowledgment button with audit timestamping.
-   - Modal for resolving alarms with mandatory technician corrective action notes.
+# Terminal 3: React Web Dashboard (Port 5173)
+cd apps/web
+npm run dev
+```
 
-5. **Predictive Maintenance & Work Orders (`/maintenance`)**
-   - Kanban-style and list views of maintenance work orders (Pending, In Progress, Completed).
-   - Priority tagging (High, Medium, Routine).
-   - "Create New Work Order" interactive modal with target asset selection, scope of work, and technician assignment.
-
-6. **Transformer Asset Registry (`/assets`)**
-   - Master technical directory of fleet transformers.
-   - Technical specifications: Serial Number, Substation, Feeder, Rating (kVA), Voltage Ratio, Cooling Class (ONAN/ONAF), Manufacturer, and Commissioning Date.
-
-7. **Reports & Analytics (`/reports`)**
-   - **Comprehensive Telemetry CSV Downloader**: Single-click export of recorded multi-sensor data points.
-   - **IEEE C57.91 Insulation Audit Report**: Printable formal documentation for engineering records.
-   - **Incident Logbook Export**: Historical record of all alarms and maintenance resolutions.
-
-8. **IoT Device & Gateway Management (`/devices`)**
-   - Edge gateway hardware inventory (ESP32-WROOM-32D, ESP32-S3, STM32F4 Gateway).
-   - Network parameters: Protocol (Wi-Fi, USB Serial, 4G LTE, RS-485 Modbus), IP address, MAC address, signal strength (RSSI in dBm), and uptime.
-   - Sensor bus mapping.
-   - Built-in ESP32 C++ Arduino sketch viewer with one-click copy.
-   - Real-time raw serial/JSON terminal console drawer.
+Open your browser at **[http://localhost:5173](http://localhost:5173)**.
 
 ---
 
-## 🔌 Hardware Connectivity & Testing Modes
+## Hardware Integration & Pinout
 
-### 1. Simulation Mode (Default)
-Allows full demonstration without physical hardware. Choose from 4 scenarios:
-- **Normal Baseline**: Standard nominal fluctuations within safe margins.
-- **Peak Overload Surge**: Current and winding hotspot surge above warning thresholds.
-- **Thermal Runaway Fault**: Oil and winding temperatures climb rapidly into critical failure territory.
-- **Harmonic Resonance**: Elevated Total Harmonic Distortion (THD > 5%) and vibration spikes.
-
-### 2. ESP32 USB Web Serial Mode
-- Connect an ESP32 microcontroller directly to your computer via USB.
-- Click **"USB SERIAL"** in the top bar or Live Telemetry module.
-- Select the serial port in Chrome/Edge/Brave at **115200 baud**.
-- The dashboard parses incoming JSON frames (`{"oilTemp": 33.4, ...}`) in real time.
-
-### 3. ESP32 Wi-Fi / REST Polling Mode
-- The ESP32 connects to local Wi-Fi and hosts a `/telemetry` endpoint.
-- Click **"WI-FI"** in the dashboard and specify the URL (defaults to `http://localhost:3000/telemetry`).
-- The dashboard polls live telemetry at 1 Hz intervals.
-
----
-
-## 🛠️ Flashing the ESP32 Firmware
-
-1. Install the **Arduino IDE** (or PlatformIO).
-2. Install the following libraries via the Arduino Library Manager:
-   - `DallasTemperature`
-   - `OneWire`
-   - `DHT sensor library`
-   - `Adafruit MPU6050`
-   - `Adafruit Unified Sensor`
-3. Click the **"Firmware"** button (`<Code2 />` icon) in the dashboard header and copy the sketch.
-4. Paste the sketch into Arduino IDE, update your Wi-Fi credentials (`ssid`, `password`), and flash to your ESP32.
-
-### Sensor Pinout Configuration
-
-| Sensor | Parameter | ESP32 GPIO | Interface |
+| Parameter | Sensor IC | ESP32 GPIO | Measurement |
 |---|---|---|---|
-| **DS18B20 / PT100** | Top Oil Temperature | `GPIO 4` | 1-Wire (4.7kΩ pullup) |
-| **SCT-013 / ACS712** | Load Current | `ADC1_CH6 (GPIO 34)` | Analog In |
-| **ZMPT101B** | Line Voltage | `ADC1_CH7 (GPIO 35)` | Analog In |
-| **MPU6050** | Core Vibration | `SDA (GPIO 21), SCL (GPIO 22)` | I2C |
-| **MQ-2** | Combustible Gas | `ADC1_CH4 (GPIO 32)` | Analog In |
-| **DHT22** | Ambient Temp & Humidity | `GPIO 13` | Digital |
+| Top-Oil Temperature | DS18B20 / PT100 | GPIO 4 | -55°C to +125°C |
+| Primary Load Current | ACS712 / CT | GPIO 34 (ADC1) | True-AC RMS (A) |
+| Secondary Line Voltage | ZMPT101B | GPIO 35 (ADC1) | True-AC RMS (V) |
+| Mechanical Vibration | MPU6050 | I2C (SDA 21, SCL 22) | RMS Acceleration (m/s²) |
+| Harmonic Distortion | Calculation | FFT on Current Samples | Total Harmonic Distortion (%) |
+| Combustible Gas | MQ-2 | GPIO 32 (ADC1) | Enclosure Gas Concentration (ppm)* |
+| Ambient Temp / Humidity | DHT22 | GPIO 13 | Ambient °C & % RH |
+
+> **IMPORTANT DISCLAIMER ON MQ-2 GAS SENSING:**
+> The MQ-2 sensor measures combustible hydrocarbon/hydrogen concentrations in the ambient transformer enclosure. It does NOT perform ASTM D3612 Dissolved Gas Analysis (DGA) in transformer oil. Any gas alarm serves as a preliminary indication to schedule physical oil laboratory testing.
 
 ---
 
-## 🌐 REST API Endpoints Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/` or `/index.html` | Serves the enterprise web application |
-| `GET` | `/api/fleet` | Returns fleet KPIs and list of all transformers |
-| `GET` | `/api/assets/:id` | Returns single transformer profile, alarms, and work orders |
-| `GET` | `/telemetry` or `/api/telemetry` | Retrieves latest sensor readings (supports `?assetId=...`) |
-| `POST`| `/telemetry` or `/api/telemetry` | Ingests sensor JSON payload from ESP32/IoT nodes |
-| `GET` | `/api/alerts` | Lists all active and historical alerts |
-| `POST`| `/api/alerts/:id/acknowledge` | Acknowledges an alert by ID |
-| `POST`| `/api/alerts/:id/resolve` | Resolves an alert with engineering notes |
-| `GET` | `/api/maintenance` | Lists all predictive maintenance work orders |
-| `POST`| `/api/maintenance` | Creates a new maintenance work order |
-| `POST`| `/api/maintenance/:id/status`| Updates work order status (`PENDING`, `IN_PROGRESS`, `COMPLETED`) |
-| `GET` | `/api/devices` | Returns connected IoT edge gateways |
-| `GET` | `/api/reports/export.csv` | Downloads full fleet CSV report |
-
----
-
-## 📄 License & Attribution
-**TransGuard AI** — Open Industrial IoT Predictive Maintenance Framework. Built for reliability, operator safety, and grid resilience.
+## License
+Apache License 2.0. Built for industrial IoT reliability and predictive maintenance operations.
